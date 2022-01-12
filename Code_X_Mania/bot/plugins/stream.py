@@ -24,13 +24,12 @@ async def login_handler(c: Client, m: Message):
         try:
             jv = await m.reply_text("Now send me password.\n\n If You don't know check the MY_PASS Variable in heroku \n\n(You can use /cancel command to cancel the process)")
             _text = await c.listen(m.chat.id, filters=filters.text, timeout=90)
-            if _text.text:
-                textp = _text.text
-                if textp=="/cancel":
-                   await jv.edit("Process Cancelled Successfully")
-                   return
-            else:
+            if not _text.text:
                 return
+            textp = _text.text
+            if textp=="/cancel":
+               await jv.edit("Process Cancelled Successfully")
+               return
         except TimeoutError:
             await jv.edit("I can't wait more for password, try again")
             return
@@ -46,7 +45,7 @@ async def login_handler(c: Client, m: Message):
 @StreamBot.on_message((filters.private) & (filters.document | filters.video | filters.audio | filters.photo) & ~filters.edited, group=4)
 async def private_receive_handler(c: Client, m: Message):
     check_pass = await pass_db.get_user_pass(m.chat.id)
-    if check_pass== None:
+    if check_pass is None:
         await m.reply_text("Login first using /login cmd \n don\'t know the pass? request it from @adarshgoelz")
         return
     if check_pass != MY_PASS:
@@ -92,7 +91,7 @@ async def private_receive_handler(c: Client, m: Message):
                 disable_web_page_preview=True)
             return
     try:
-        
+
         file_size = None
         if m.video:
             file_size = f"{humanbytes(m.video.file_size)}"
@@ -114,14 +113,14 @@ async def private_receive_handler(c: Client, m: Message):
         elif m.photo:
             file_name=f"{m.photo.file_name}"
         """
-            
+
         log_msg = await m.forward(chat_id=Var.BIN_CHANNEL)
         stream_link = Var.URL + 'watch/' + str(log_msg.message_id) 
-        
+
         online_link = Var.URL + 'download/'+ str(log_msg.message_id) 
-       
-        
-        
+
+
+
 
         msg_text ="""
 <i><u>𝗬𝗼𝘂𝗿 𝗟𝗶𝗻𝗸 𝗚𝗲𝗻𝗲𝗿𝗮𝘁𝗲𝗱 !</u></i>
@@ -146,15 +145,20 @@ async def private_receive_handler(c: Client, m: Message):
                                                 InlineKeyboardButton('Dᴏᴡɴʟᴏᴀᴅ📥', url=online_link)]]) #Download Link
         )
     except FloodWait as e:
-        print(f"Sleeping for {str(e.x)}s")
+        print(f'Sleeping for {e.x}s')
         await asyncio.sleep(e.x)
-        await c.send_message(chat_id=Var.BIN_CHANNEL, text=f"Gᴏᴛ FʟᴏᴏᴅWᴀɪᴛ ᴏғ {str(e.x)}s from [{m.from_user.first_name}](tg://user?id={m.from_user.id})\n\n**𝚄𝚜𝚎𝚛 𝙸𝙳 :** `{str(m.from_user.id)}`", disable_web_page_preview=True, parse_mode="Markdown")
+        await c.send_message(
+            chat_id=Var.BIN_CHANNEL,
+            text=f'Gᴏᴛ FʟᴏᴏᴅWᴀɪᴛ ᴏғ {e.x}s from [{m.from_user.first_name}](tg://user?id={m.from_user.id})\n\n**𝚄𝚜𝚎𝚛 𝙸𝙳 :** `{m.from_user.id}`',
+            disable_web_page_preview=True,
+            parse_mode="Markdown",
+        )
 
 
 @StreamBot.on_message(filters.channel & ~filters.group & (filters.document | filters.video | filters.photo) & ~filters.edited & ~filters.forwarded, group=-1)
 async def channel_receive_handler(bot, broadcast):
     check_pass = await pass_db.get_user_pass(broadcast.chat.id)
-    if check_pass == None:
+    if check_pass is None:
         await broadcast.reply_text("Login first using /login cmd \n don\'t know the pass? request it from @adarshgoelz")
         return
     if check_pass != MY_PASS:
@@ -184,11 +188,15 @@ async def channel_receive_handler(bot, broadcast):
             )
         )
     except FloodWait as w:
-        print(f"Sleeping for {str(w.x)}s")
+        print(f'Sleeping for {w.x}s')
         await asyncio.sleep(w.x)
-        await bot.send_message(chat_id=Var.BIN_CHANNEL,
-                             text=f"Gᴏᴛ FʟᴏᴏᴅWᴀɪᴛ ᴏғ {str(w.x)}s from {broadcast.chat.title}\n\n**Cʜᴀɴɴᴇʟ ID:** `{str(broadcast.chat.id)}`",
-                             disable_web_page_preview=True, parse_mode="Markdown")
+        await bot.send_message(
+            chat_id=Var.BIN_CHANNEL,
+            text=f'Gᴏᴛ FʟᴏᴏᴅWᴀɪᴛ ᴏғ {w.x}s from {broadcast.chat.title}\n\n**Cʜᴀɴɴᴇʟ ID:** `{broadcast.chat.id}`',
+            disable_web_page_preview=True,
+            parse_mode="Markdown",
+        )
+
     except Exception as e:
         await bot.send_message(chat_id=Var.BIN_CHANNEL, text=f"**#ᴇʀʀᴏʀ_ᴛʀᴀᴄᴇʙᴀᴄᴋ:** `{e}`", disable_web_page_preview=True, parse_mode="Markdown")
         print(f"Cᴀɴ'ᴛ Eᴅɪᴛ Bʀᴏᴀᴅᴄᴀsᴛ Mᴇssᴀɢᴇ!\nEʀʀᴏʀ:  **Give me edit permission in updates and bin Chanell{e}**")
