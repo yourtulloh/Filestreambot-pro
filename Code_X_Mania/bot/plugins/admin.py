@@ -23,19 +23,18 @@ async def sts(c: Client, m: Message):
         await m.reply_text(text=f"Total Users in DB: {total_users}", parse_mode="Markdown", quote=True)
         
         
-@StreamBot.on_message(filters.command("broadcast") & filters.private & ~filters.edited)
+@StreamBot.on_message(filters.command("broadcast") & filters.private & ~filters.edited & filters.user(list(Var.OWNER_ID)))
 async def broadcast_(c, m):
     user_id=m.from_user.id
-    if user_id in Var.OWNER_ID:
-        all_users = await db.get_all_users()
-        broadcast_msg = m.reply_to_message
-        while True:
-            broadcast_id = ''.join([random.choice(string.ascii_letters) for i in range(3)])
-            if not broadcast_ids.get(broadcast_id):
-                break
-        out = await m.reply_text(
+    out = await m.reply_text(
             text=f"Broadcast initiated! You will be notified with log file when all the users are notified."
     )
+    all_users = await db.get_all_users()
+    broadcast_msg = m.reply_to_message
+    while True:
+        broadcast_id = ''.join([random.choice(string.ascii_letters) for i in range(3)])
+        if not broadcast_ids.get(broadcast_id):
+            break
     start_time = time.time()
     total_users = await db.total_users_count()
     done = 0
